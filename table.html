@@ -1,42 +1,196 @@
-<script>
-    // Fetch data from Google Apps Script
-    async function fetchData() {
-        try {
-            const response = await fetch('https://script.google.com/macros/s/AKfycbzz5MCC2s-GU4JWcDqLKj8pvrbW7w_QLED3J0nXY5qQrauJnxmFtHEvKVzhi_kcUdge/exec');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta content='width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1' name='viewport'/>
+    <title><data:blog.pageTitle/></title>
+    <b:include data='blog' name='all-head-content'/>
+
+    <!-- Resources -->
+    <link expr:href='data:blog.url.canonical' rel='canonical'/>
+    <link href='https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css' rel='stylesheet'/>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/>
+
+    <b:skin><![CDATA[
+    /* Custom CSS */
+    :root {
+        --primary-color: #4a90e2;
+        --secondary-color: #f5f5f5;
+        --accent-color: #2ecc71;
+        --text-color: #333;
+    }
+
+    .table-container {
+        background: var(--bs-dark);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-box {
+        background: var(--bs-dark);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-responsive {
+        max-height: 70vh;
+        overflow-y: auto;
+        border-radius: 8px;
+    }
+
+    .table th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(74, 144, 226, 0.1);
+    }
+
+    .search-input {
+        border-radius: 20px;
+        padding: 10px 20px;
+        border: 2px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        border-color: var(--primary-color);
+    }
+
+    .search-button {
+        border-radius: 20px;
+        padding: 10px 25px;
+        background-color: var(--primary-color);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-button:hover {
+        background-color: #357abd;
+        transform: translateY(-1px);
+    }
+    ]]></b:skin>
+</head>
+
+<body>
+    <!-- Main Content -->
+    <b:section class='main' id='main' showaddelement='no'>
+        <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' visible='true'>
+            <div class='container py-4'>
+                <!-- Search Box -->
+                <div class='search-box'>
+                    <div class='row g-3 align-items-center'>
+                        <div class='col-md-9'>
+                            <input type='text' class='form-control search-input' id='searchInput' placeholder='Search anything...'/>
+                        </div>
+                        <div class='col-md-3'>
+                            <button class='btn btn-primary search-button w-100' onclick='searchData()'>
+                                <i class='fas fa-search'/> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class='table-container'>
+                    <div class='table-responsive'>
+                        <table class='table table-hover'>
+                            <thead>
+                                <tr>
+                                    <th>URL</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Views</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id='dataTableBody'/>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </b:widget>
+    </b:section>
+
+    <!-- Scripts -->
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'/>
+    <b:template-script>
+    //<![CDATA[
+        let data = [
+            {
+                url: 'https://example.com/post1',
+                title: 'Sample Blog Post 1',
+                category: 'Technology',
+                views: 1200,
+                status: 'Published'
+            },
+            {
+                url: 'https://example.com/post2',
+                title: 'Sample Blog Post 2',
+                category: 'Lifestyle',
+                views: 850,
+                status: 'Draft'
             }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            return [];
+            // Add more sample data here
+        ];
+
+        // Initialize data table
+        function initializeData() {
+            renderTable();
+            console.log('Table initialized successfully');
         }
-    }
 
-    // Render Table Function
-    function renderTable(data) {
-        const tableBody = document.getElementById("tableBody");
-        tableBody.innerHTML = data.map(item => `
-            <tr>
-                <td>${item.URL || ''}</td>
-                <td>${item.Price || ''}</td>
-                <td>${item.Description || ''}</td>
-                <td>${item.Category || ''}</td>
-                <td>${item.Availability || ''}</td>
-            </tr>
-        `).join("");
-    }
+        // Render table data
+        function renderTable(filteredData = null) {
+            const tableBody = document.getElementById('dataTableBody');
+            const displayData = filteredData || data;
 
-    // Search Functionality
-    function searchData() {
-        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-        fetchData().then(data => {
-            const filteredData = data.filter(item => item.URL.toLowerCase().includes(searchTerm));
+            tableBody.innerHTML = displayData.map(item => `
+                <tr>
+                    <td><a href="${item.url}" target="_blank">${item.url}</a></td>
+                    <td>${item.title}</td>
+                    <td>${item.category}</td>
+                    <td>${item.views}</td>
+                    <td>
+                        <span class="badge bg-${item.status === 'Published' ? 'success' : 'secondary'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            console.log('Table rendered with', displayData.length, 'rows');
+        }
+
+        // Search functionality
+        function searchData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            const filteredData = data.filter(item => 
+                Object.values(item).some(value => 
+                    String(value).toLowerCase().includes(searchTerm)
+                )
+            );
+
             renderTable(filteredData);
-        });
-    }
+            console.log('Search completed for term:', searchTerm, 'Found:', filteredData.length, 'results');
+        }
 
-    // Initial Load
-    fetchData().then(data => renderTable(data));
-</script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeData);
+        console.log('Spreadsheet viewer initialized');
+    //]]>
+    </b:template-script>
+</body>
+</html>
